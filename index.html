@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -15,73 +17,148 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0a0e27;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 121, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(52, 211, 153, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 48px;
+            max-width: 650px;
             width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-size: 40px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6); }
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-align: center;
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            font-weight: 400;
         }
 
         .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
+            border: 2px dashed rgba(102, 126, 234, 0.5);
+            border-radius: 16px;
+            padding: 50px 30px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9ff;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(102, 126, 234, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
         }
 
         .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f2ff;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
         }
 
         .upload-area.dragover {
-            border-color: #764ba2;
-            background: #e8ebff;
+            border-color: #ff79c6;
+            background: rgba(255, 121, 198, 0.1);
             transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(255, 121, 198, 0.2);
         }
 
         .upload-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
+            font-size: 56px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .upload-text {
-            color: #667eea;
-            font-size: 18px;
+            color: #ffffff;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .upload-hint {
-            color: #999;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
         }
 
@@ -90,139 +167,211 @@
         }
 
         .file-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f2ff;
-            border-radius: 10px;
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
             display: none;
+            backdrop-filter: blur(10px);
         }
 
         .file-info.show {
             display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .file-name {
-            color: #333;
+            color: #ffffff;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 16px;
         }
 
         .file-size {
-            color: #666;
+            color: rgba(255, 255, 255, 0.6);
             font-size: 14px;
         }
 
         .status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
+            margin-top: 24px;
+            padding: 16px 20px;
+            border-radius: 12px;
             text-align: center;
             display: none;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
         }
 
         .status.show {
             display: block;
+            animation: slideIn 0.4s ease-out;
         }
 
         .status.processing {
-            background: #fff3cd;
-            color: #856404;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
         }
 
         .status.success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: #34d399;
         }
 
         .status.error {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #f87171;
         }
 
         .download-btn {
             display: none;
             width: 100%;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 18px;
+            margin-top: 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
         }
 
         .download-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(-1px);
         }
 
         .download-btn.show {
             display: block;
+            animation: slideIn 0.4s ease-out;
         }
 
         .convert-more-btn {
             display: none;
             width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 18px;
+            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .convert-more-btn:hover {
-            background: #f0f2ff;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
         }
 
         .convert-more-btn.show {
             display: block;
+            animation: slideIn 0.4s ease-out 0.1s backwards;
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: #e0e0e0;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
             overflow: hidden;
             display: none;
         }
 
         .progress-bar.show {
             display: block;
+            animation: slideIn 0.4s ease-out;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #ff79c6 100%);
+            background-size: 200% 100%;
             width: 0%;
             transition: width 0.3s ease;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
         .csv-count {
-            margin-top: 10px;
-            color: #667eea;
+            margin-top: 12px;
+            color: #34d399;
             font-weight: 600;
+            font-size: 15px;
+        }
+
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            animation: sparkleFloat 3s ease-out forwards;
+        }
+
+        @keyframes sparkleFloat {
+            0% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 CSV to Excel Converter</h1>
-        <p class="subtitle">Upload a ZIP file containing CSV files</p>
+        <div class="header">
+            <div class="logo">✨</div>
+            <h1>CSV Fusion</h1>
+            <p class="subtitle">Transform your scattered CSVs into one elegant Excel masterpiece</p>
+        </div>
         
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <div class="upload-text">Click to upload or drag & drop</div>
-            <div class="upload-hint">ZIP files only (Max 50MB)</div>
+            <div class="upload-icon">🚀</div>
+            <div class="upload-text">Drop your ZIP file here</div>
+            <div class="upload-hint">or click to browse • ZIP files only • Max 50MB</div>
             <input type="file" id="fileInput" accept=".zip">
         </div>
 
@@ -257,6 +406,18 @@
 
         let workbook = null;
 
+        // Sparkle effect
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.textContent = '✨';
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 3000);
+        }
+
         uploadArea.addEventListener('click', () => fileInput.click());
 
         uploadArea.addEventListener('dragover', (e) => {
@@ -273,6 +434,7 @@
             uploadArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
             if (files.length > 0) {
+                createSparkle(e.clientX, e.clientY);
                 handleFile(files[0]);
             }
         });
@@ -285,21 +447,22 @@
 
         async function handleFile(file) {
             if (!file.name.endsWith('.zip')) {
-                showStatus('Please upload a ZIP file', 'error');
+                showStatus('⚠️ Please upload a ZIP file', 'error');
                 return;
             }
 
             if (file.size > 50 * 1024 * 1024) {
-                showStatus('File size exceeds 50MB limit', 'error');
+                showStatus('⚠️ File size exceeds 50MB limit', 'error');
                 return;
             }
 
-            fileName.textContent = file.name;
+            fileName.textContent = '📦 ' + file.name;
             fileSize.textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
             fileInfo.classList.add('show');
             downloadBtn.classList.remove('show');
+            convertMoreBtn.classList.remove('show');
 
-            showStatus('Processing ZIP file...', 'processing');
+            showStatus('⚡ Processing ZIP file...', 'processing');
             progressBar.classList.add('show');
             updateProgress(10);
 
@@ -310,17 +473,16 @@
                 );
 
                 if (csvFiles.length === 0) {
-                    showStatus('No CSV files found in ZIP', 'error');
+                    showStatus('❌ No CSV files found in ZIP', 'error');
                     progressBar.classList.remove('show');
                     return;
                 }
 
-                csvCount.textContent = `Found ${csvFiles.length} CSV file(s)`;
+                csvCount.textContent = `✓ Found ${csvFiles.length} CSV file${csvFiles.length > 1 ? 's' : ''}`;
                 updateProgress(30);
 
                 workbook = XLSX.utils.book_new();
                 let processed = 0;
-
                 const usedSheetNames = new Set();
 
                 for (const csvFile of csvFiles) {
@@ -355,12 +517,12 @@
                 }
 
                 updateProgress(100);
-                showStatus(`✅ Successfully processed ${csvFiles.length} CSV file(s)`, 'success');
+                showStatus(`🎉 Successfully processed ${csvFiles.length} CSV file${csvFiles.length > 1 ? 's' : ''}!`, 'success');
                 downloadBtn.classList.add('show');
                 convertMoreBtn.classList.add('show');
 
             } catch (error) {
-                showStatus('Error processing ZIP file: ' + error.message, 'error');
+                showStatus('❌ Error processing ZIP file: ' + error.message, 'error');
                 progressBar.classList.remove('show');
             }
         }
@@ -369,6 +531,16 @@
             if (workbook) {
                 XLSX.writeFile(workbook, 'combined_output.xlsx');
                 showStatus('✅ Excel file downloaded successfully!', 'success');
+                
+                // Create sparkles on download
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        createSparkle(
+                            Math.random() * window.innerWidth,
+                            Math.random() * window.innerHeight
+                        );
+                    }, i * 100);
+                }
             }
         });
 
