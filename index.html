@@ -295,6 +295,8 @@
                 workbook = XLSX.utils.book_new();
                 let processed = 0;
 
+                const usedSheetNames = new Set();
+
                 for (const csvFile of csvFiles) {
                     const content = await zip.files[csvFile].async('string');
                     const parsed = Papa.parse(content, {
@@ -304,11 +306,23 @@
                     });
 
                     let sheetName = csvFile.split('/').pop().replace('.csv', '');
-                    sheetName = sheetName.substring(0, 31);
                     sheetName = sheetName.replace(/[:\\/?*\[\]]/g, '_');
+                    
+                    // Handle duplicate sheet names
+                    let finalSheetName = sheetName.substring(0, 31);
+                    let counter = 1;
+                    
+                    while (usedSheetNames.has(finalSheetName)) {
+                        const suffix = `_${counter}`;
+                        const maxLength = 31 - suffix.length;
+                        finalSheetName = sheetName.substring(0, maxLength) + suffix;
+                        counter++;
+                    }
+                    
+                    usedSheetNames.add(finalSheetName);
 
                     const worksheet = XLSX.utils.json_to_sheet(parsed.data);
-                    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+                    XLSX.utils.book_append_sheet(workbook, worksheet, finalSheetName);
 
                     processed++;
                     updateProgress(30 + (processed / csvFiles.length) * 60);
