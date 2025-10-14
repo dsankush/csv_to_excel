@@ -162,6 +162,30 @@
             display: block;
         }
 
+        .convert-more-btn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .convert-more-btn:hover {
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .convert-more-btn.show {
+            display: block;
+        }
+
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -215,6 +239,7 @@
         <div class="status" id="status"></div>
 
         <button class="download-btn" id="downloadBtn">⬇️ Download Excel File</button>
+        <button class="convert-more-btn" id="convertMoreBtn">🔄 Convert Another File</button>
     </div>
 
     <script>
@@ -226,6 +251,7 @@
         const csvCount = document.getElementById('csvCount');
         const status = document.getElementById('status');
         const downloadBtn = document.getElementById('downloadBtn');
+        const convertMoreBtn = document.getElementById('convertMoreBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
 
@@ -331,6 +357,7 @@
                 updateProgress(100);
                 showStatus(`✅ Successfully processed ${csvFiles.length} CSV file(s)`, 'success');
                 downloadBtn.classList.add('show');
+                convertMoreBtn.classList.add('show');
 
             } catch (error) {
                 showStatus('Error processing ZIP file: ' + error.message, 'error');
@@ -343,6 +370,21 @@
                 XLSX.writeFile(workbook, 'combined_output.xlsx');
                 showStatus('✅ Excel file downloaded successfully!', 'success');
             }
+        });
+
+        convertMoreBtn.addEventListener('click', () => {
+            // Reset everything
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+            status.classList.remove('show');
+            downloadBtn.classList.remove('show');
+            convertMoreBtn.classList.remove('show');
+            progressBar.classList.remove('show');
+            progressFill.style.width = '0%';
+            workbook = null;
+            fileName.textContent = '';
+            fileSize.textContent = '';
+            csvCount.textContent = '';
         });
 
         function showStatus(message, type) {
