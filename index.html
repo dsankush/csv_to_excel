@@ -496,31 +496,46 @@
                         dynamicTyping: true
                     });
 
-                    let sheetName = csvFile.split('/').pop().replace('.csv', '');
-                    sheetName = sheetName.replace(/[:\\/?*\[\]]/g, '_');
-                    
-                    // Handle duplicate sheet names
-                    let finalSheetName = sheetName.substring(0, 31);
-                    let counter = 1;
-                    
-                    while (usedSheetNames.has(finalSheetName)) {
-                        const suffix = `_${counter}`;
-                        const maxLength = 31 - suffix.length;
-                        finalSheetName = sheetName.substring(0, maxLength) + suffix;
-                        counter++;
-                    }
-                    
-                    usedSheetNames.add(finalSheetName);
+                    // Extract only first 4 columns
+                    if (parsed.data.length > 0) {
+                        const headers = Object.keys(parsed.data[0]);
+                        const first4Headers = headers.slice(0, 4);
+                        
+                        // Filter each row to only include first 4 columns
+                        const filteredData = parsed.data.map(row => {
+                            const filteredRow = {};
+                            first4Headers.forEach(header => {
+                                filteredRow[header] = row[header];
+                            });
+                            return filteredRow;
+                        });
 
-                    const worksheet = XLSX.utils.json_to_sheet(parsed.data);
-                    XLSX.utils.book_append_sheet(workbook, worksheet, finalSheetName);
+                        let sheetName = csvFile.split('/').pop().replace('.csv', '');
+                        sheetName = sheetName.replace(/[:\\/?*\[\]]/g, '_');
+                        
+                        // Handle duplicate sheet names
+                        let finalSheetName = sheetName.substring(0, 31);
+                        let counter = 1;
+                        
+                        while (usedSheetNames.has(finalSheetName)) {
+                            const suffix = `_${counter}`;
+                            const maxLength = 31 - suffix.length;
+                            finalSheetName = sheetName.substring(0, maxLength) + suffix;
+                            counter++;
+                        }
+                        
+                        usedSheetNames.add(finalSheetName);
+
+                        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                        XLSX.utils.book_append_sheet(workbook, worksheet, finalSheetName);
+                    }
 
                     processed++;
                     updateProgress(30 + (processed / csvFiles.length) * 60);
                 }
 
                 updateProgress(100);
-                showStatus(`🎉 Successfully processed ${csvFiles.length} CSV file${csvFiles.length > 1 ? 's' : ''}!`, 'success');
+                showStatus(`🎉 Successfully processed ${csvFiles.length} CSV file${csvFiles.length > 1 ? 's' : ''} (first 4 columns only)!`, 'success');
                 downloadBtn.classList.add('show');
                 convertMoreBtn.classList.add('show');
 
