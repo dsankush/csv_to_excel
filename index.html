@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV to Excel Converter</title>
+    <title>CSV & Excel Merger</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -108,6 +108,493 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(102, 126, 234, 0.05);
             position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-area.dragover {
+            border-color: #ff79c6;
+            background: rgba(255, 121, 198, 0.1);
+            transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(255, 121, 198, 0.2);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-text {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .upload-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .file-info.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .file-name {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .file-size {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+        }
+
+        .status.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .status.processing {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
+        }
+
+        .status.success {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: #34d399;
+        }
+
+        .status.error {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #f87171;
+        }
+
+        .download-btn {
+            display: none;
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .download-btn.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .convert-more-btn {
+            display: none;
+            width: 100%;
+            padding: 16px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .convert-more-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+        }
+
+        .convert-more-btn.show {
+            display: block;
+            animation: slideIn 0.4s ease-out 0.1s backwards;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 16px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #ff79c6 100%);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .file-count {
+            margin-top: 10px;
+            color: #34d399;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .sheet-count {
+            margin-top: 5px;
+            color: #fbbf24;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            animation: sparkleFloat 3s ease-out forwards;
+        }
+
+        @keyframes sparkleFloat {
+            0% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">✨</div>
+            <h1>CSV & Excel Fusion</h1>
+            <p class="subtitle">Merge CSV and Excel files into one unified workbook</p>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">🚀</div>
+            <div class="upload-text">Drop your ZIP file here</div>
+            <div class="upload-hint">CSV & Excel supported • ZIP files only • Max 50MB</div>
+            <input type="file" id="fileInput" accept=".zip">
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+            <div class="file-count" id="fileCount"></div>
+            <div class="sheet-count" id="sheetCount"></div>
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <button class="download-btn" id="downloadBtn">⬇️ Download Merged Excel File</button>
+        <button class="convert-more-btn" id="convertMoreBtn">🔄 Convert Another File</button>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileCount = document.getElementById('fileCount');
+        const sheetCount = document.getElementById('sheetCount');
+        const status = document.getElementById('status');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const convertMoreBtn = document.getElementById('convertMoreBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        let workbook = null;
+
+        // Sparkle effect
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.textContent = '✨';
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 3000);
+        }
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                createSparkle(e.clientX, e.clientY);
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Generate unique sheet name
+        function generateUniqueSheetName(baseName, usedNames) {
+            // Sanitize the base name
+            let sanitized = baseName.replace(/[:\\/?*\[\]]/g, '_');
+            
+            // Truncate to fit counter if needed
+            let sheetName = sanitized.substring(0, 31);
+            
+            if (!usedNames.has(sheetName)) {
+                usedNames.add(sheetName);
+                return sheetName;
+            }
+            
+            // If duplicate, add counter
+            let counter = 2;
+            let uniqueName;
+            
+            while (true) {
+                const suffix = `_${counter}`;
+                const maxLength = 31 - suffix.length;
+                uniqueName = sanitized.substring(0, maxLength) + suffix;
+                
+                if (!usedNames.has(uniqueName)) {
+                    usedNames.add(uniqueName);
+                    return uniqueName;
+                }
+                counter++;
+            }
+        }
+
+        // Extract first 4 columns from data
+        function extractFirst4Columns(data) {
+            if (!data || data.length === 0) return data;
+            
+            const headers = Object.keys(data[0]);
+            const first4Headers = headers.slice(0, 4);
+            
+            return data.map(row => {
+                const filteredRow = {};
+                first4Headers.forEach(header => {
+                    filteredRow[header] = row[header];
+                });
+                return filteredRow;
+            });
+        }
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.zip')) {
+                showStatus('⚠️ Please upload a ZIP file', 'error');
+                return;
+            }
+
+            if (file.size > 50 * 1024 * 1024) {
+                showStatus('⚠️ File size exceeds 50MB limit', 'error');
+                return;
+            }
+
+            fileName.textContent = '📦 ' + file.name;
+            fileSize.textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            fileInfo.classList.add('show');
+            downloadBtn.classList.remove('show');
+            convertMoreBtn.classList.remove('show');
+
+            showStatus('⚡ Processing ZIP file...', 'processing');
+            progressBar.classList.add('show');
+            updateProgress(10);
+
+            try {
+                const zip = await JSZip.loadAsync(file);
+                
+                // Filter out system files and get CSV and Excel files
+                const csvFiles = Object.keys(zip.files).filter(name => 
+                    name.endsWith('.csv') && !name.startsWith('__MACOSX') && !name.includes('/.') && !name.startsWith('.')
+                );
+                
+                const excelFiles = Object.keys(zip.files).filter(name => 
+                    (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.xlsm')) && 
+                    !name.startsWith('__MACOSX') && !name.includes('/.') && !name.startsWith('.')
+                );
+
+                const totalFiles = csvFiles.length + excelFiles.length;
+
+                if (totalFiles === 0) {
+                    showStatus('❌ No CSV or Excel files found in ZIP', 'error');
+                    progressBar.classList.remove('show');
+                    return;
+                }
+
+                fileCount.textContent = `✓ Found ${csvFiles.length} CSV and ${excelFiles.length} Excel file(s)`;
+                updateProgress(20);
+
+                workbook = XLSX.utils.book_new();
+                const usedSheetNames = new Set();
+                let totalSheets = 0;
+                let processed = 0;
+
+                // Process CSV files
+                for (const csvFile of csvFiles) {
+                    const content = await zip.files[csvFile].async('string');
+                    const parsed = Papa.parse(content, {
+                        header: true,
+                        skipEmptyLines: true,
+                        dynamicTyping: true
+                    });
+
+                    if (parsed.data.length > 0) {
+                        const filteredData = extractFirst4Columns(parsed.data);
+                        
+                        // Generate unique sheet name from file name
+                        const baseName = csvFile.split('/').pop().replace('.csv', '');
+                        const sheetName = generateUniqueSheetName(baseName, usedSheetNames);
+
+                        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+                        totalSheets++;
+                    }
+
+                    processed++;
+                    updateProgress(20 + (processed / totalFiles) * 40);
+                }
+
+                // Process Excel files
+                for (const excelFile of excelFiles) {
+                    const content = await zip.files[excelFile].async('arraybuffer');
+                    const excelWorkbook = XLSX.read(content, { type: 'array' });
+                    
+                    const baseFileName = excelFile.split('/').pop().replace(/\.(xlsx|xls|xlsm)$/, '');
+                    
+                    // Process each sheet in the Excel file
+                    for (const sheetName of excelWorkbook.SheetNames) {
+                        const worksheet = excelWorkbook.Sheets[sheetName];
+                        const data = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        if (data.length > 0) {
+                            const filteredData = extractFirst4Columns(data);
+                            
+                            // Create sheet name: FileName_SheetName
+                            const combinedName = `${baseFileName}_${sheetName}            position: relative;
             overflow: hidden;
         }
 
