@@ -514,12 +514,12 @@
             }
         }
 
-        // Extract first 11 columns from data
+        // Extract first 25 columns from data
         function extractFirst11Columns(data) {
             if (!data || data.length === 0) return data;
 
             const headers = Object.keys(data[0]);
-            const first11Headers = headers.slice(0, 11);
+            const first11Headers = headers.slice(0, 25);
 
             return data.map(row => {
                 const filteredRow = {};
@@ -678,7 +678,7 @@
                 }
 
                 updateProgress(100);
-                sheetCount.textContent = `📊 Created ${totalSheets} sheet(s) with first 11 columns`;
+                sheetCount.textContent = `📊 Created ${totalSheets} sheet(s) with first 25 columns`;
                 showStatus(`🎉 Successfully merged ${totalFiles} file(s) into ${totalSheets} sheet(s)!`, 'success');
                 downloadBtn.classList.add('show');
                 convertMoreBtn.classList.add('show');
