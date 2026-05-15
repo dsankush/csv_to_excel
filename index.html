@@ -434,14 +434,12 @@
 
         let workbook = null;
 
-        // Debug logging
         function debugLog(message) {
             console.log(message);
             debugInfo.textContent += message + '\n';
             debugInfo.classList.add('show');
         }
 
-        // Sparkle effect
         function createSparkle(x, y) {
             const sparkle = document.createElement('div');
             sparkle.className = 'sparkle';
@@ -491,28 +489,23 @@
             }
         });
 
-        // Generate unique sheet name
         function generateUniqueSheetName(baseName, usedNames) {
-            // Sanitize the base name
             let sanitized = baseName.replace(/[:\\/?*\[\]]/g, '_');
-            
-            // Truncate to fit counter if needed
             let sheetName = sanitized.substring(0, 31);
-            
+
             if (!usedNames.has(sheetName)) {
                 usedNames.add(sheetName);
                 return sheetName;
             }
-            
-            // If duplicate, add counter
+
             let counter = 2;
             let uniqueName;
-            
+
             while (true) {
                 const suffix = `_${counter}`;
                 const maxLength = 31 - suffix.length;
                 uniqueName = sanitized.substring(0, maxLength) + suffix;
-                
+
                 if (!usedNames.has(uniqueName)) {
                     usedNames.add(uniqueName);
                     return uniqueName;
@@ -521,16 +514,16 @@
             }
         }
 
-        // Extract first 4 columns from data
-        function extractFirst4Columns(data) {
+        // Extract first 11 columns from data
+        function extractFirst11Columns(data) {
             if (!data || data.length === 0) return data;
-            
+
             const headers = Object.keys(data[0]);
-            const first4Headers = headers.slice(0, 4);
-            
+            const first11Headers = headers.slice(0, 11);
+
             return data.map(row => {
                 const filteredRow = {};
-                first4Headers.forEach(header => {
+                first11Headers.forEach(header => {
                     filteredRow[header] = row[header];
                 });
                 return filteredRow;
@@ -539,8 +532,7 @@
 
         async function handleFile(file) {
             debugLog('Handling file: ' + file.name + ', type: ' + file.type + ', size: ' + file.size);
-            
-            // Reset debug info
+
             debugInfo.textContent = '';
             debugInfo.classList.remove('show');
 
@@ -571,35 +563,33 @@
                 const zip = await JSZip.loadAsync(file);
                 debugLog('ZIP loaded successfully');
                 debugLog('Files in ZIP: ' + Object.keys(zip.files).length);
-                
-                // List all files in the ZIP
+
                 Object.keys(zip.files).forEach(name => {
                     debugLog('  - ' + name);
                 });
-                
-                // Filter out system files and get CSV and Excel files
+
                 const csvFiles = Object.keys(zip.files).filter(name => {
-                    const file = zip.files[name];
-                    return !file.dir && 
-                           name.toLowerCase().endsWith('.csv') && 
-                           !name.includes('__MACOSX') && 
-                           !name.includes('/.') && 
+                    const f = zip.files[name];
+                    return !f.dir &&
+                           name.toLowerCase().endsWith('.csv') &&
+                           !name.includes('__MACOSX') &&
+                           !name.includes('/.') &&
                            !name.startsWith('.');
                 });
-                
+
                 const excelFiles = Object.keys(zip.files).filter(name => {
-                    const file = zip.files[name];
+                    const f = zip.files[name];
                     const lowerName = name.toLowerCase();
-                    return !file.dir && 
-                           (lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls') || lowerName.endsWith('.xlsm')) && 
-                           !name.includes('__MACOSX') && 
-                           !name.includes('/.') && 
+                    return !f.dir &&
+                           (lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls') || lowerName.endsWith('.xlsm')) &&
+                           !name.includes('__MACOSX') &&
+                           !name.includes('/.') &&
                            !name.startsWith('.');
                 });
 
                 debugLog('CSV files found: ' + csvFiles.length);
                 csvFiles.forEach(f => debugLog('  CSV: ' + f));
-                
+
                 debugLog('Excel files found: ' + excelFiles.length);
                 excelFiles.forEach(f => debugLog('  Excel: ' + f));
 
@@ -626,7 +616,7 @@
                     debugLog('Processing CSV: ' + csvFile);
                     const content = await zip.files[csvFile].async('string');
                     debugLog('CSV content length: ' + content.length);
-                    
+
                     const parsed = Papa.parse(content, {
                         header: true,
                         skipEmptyLines: true,
@@ -636,9 +626,8 @@
                     debugLog('Parsed rows: ' + parsed.data.length);
 
                     if (parsed.data.length > 0) {
-                        const filteredData = extractFirst4Columns(parsed.data);
-                        
-                        // Generate unique sheet name from file name
+                        const filteredData = extractFirst11Columns(parsed.data);
+
                         const baseName = csvFile.split('/').pop().replace('.csv', '');
                         const sheetName = generateUniqueSheetName(baseName, usedSheetNames);
                         debugLog('Creating sheet: ' + sheetName);
@@ -658,28 +647,26 @@
                     debugLog('Processing Excel: ' + excelFile);
                     const content = await zip.files[excelFile].async('arraybuffer');
                     debugLog('Excel file size: ' + content.byteLength);
-                    
+
                     const excelWorkbook = XLSX.read(content, { type: 'array' });
                     debugLog('Excel sheets: ' + excelWorkbook.SheetNames.length);
-                    
+
                     const baseFileName = excelFile.split('/').pop().replace(/\.(xlsx|xls|xlsm)$/i, '');
-                    
-                    // Process each sheet in the Excel file
+
                     for (const sheetName of excelWorkbook.SheetNames) {
                         debugLog('Processing sheet: ' + sheetName);
                         const worksheet = excelWorkbook.Sheets[sheetName];
                         const data = XLSX.utils.sheet_to_json(worksheet);
-                        
+
                         debugLog('Sheet rows: ' + data.length);
 
                         if (data.length > 0) {
-                            const filteredData = extractFirst4Columns(data);
-                            
-                            // Create sheet name: FileName_SheetName
+                            const filteredData = extractFirst11Columns(data);
+
                             const combinedName = `${baseFileName}_${sheetName}`;
                             const uniqueSheetName = generateUniqueSheetName(combinedName, usedSheetNames);
                             debugLog('Creating sheet: ' + uniqueSheetName);
-                            
+
                             const newWorksheet = XLSX.utils.json_to_sheet(filteredData);
                             XLSX.utils.book_append_sheet(workbook, newWorksheet, uniqueSheetName);
                             totalSheets++;
@@ -691,7 +678,7 @@
                 }
 
                 updateProgress(100);
-                sheetCount.textContent = `📊 Created ${totalSheets} sheet(s) with first 4 columns`;
+                sheetCount.textContent = `📊 Created ${totalSheets} sheet(s) with first 11 columns`;
                 showStatus(`🎉 Successfully merged ${totalFiles} file(s) into ${totalSheets} sheet(s)!`, 'success');
                 downloadBtn.classList.add('show');
                 convertMoreBtn.classList.add('show');
@@ -711,8 +698,7 @@
                 debugLog('Downloading workbook...');
                 XLSX.writeFile(workbook, 'merged_output.xlsx');
                 showStatus('✅ Excel file downloaded successfully!', 'success');
-                
-                // Create sparkles on download
+
                 for (let i = 0; i < 5; i++) {
                     setTimeout(() => {
                         createSparkle(
@@ -725,7 +711,6 @@
         });
 
         convertMoreBtn.addEventListener('click', () => {
-            // Reset everything
             fileInput.value = '';
             fileInfo.classList.remove('show');
             status.classList.remove('show');
@@ -751,7 +736,6 @@
             progressFill.style.width = percent + '%';
         }
 
-        // Check if libraries are loaded
         window.addEventListener('load', () => {
             debugLog('Page loaded');
             debugLog('JSZip available: ' + (typeof JSZip !== 'undefined'));
